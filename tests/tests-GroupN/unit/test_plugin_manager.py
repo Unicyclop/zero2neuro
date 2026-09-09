@@ -1,3 +1,11 @@
+"""
+Unit tests for selected behavior in Zero2Neuro's plugin_manager module.
+
+These tests verify plugin-file lookup and plugin application behavior.
+Small fake plugin objects are used where necessary to test PluginManager
+independently from real plugin implementations.
+"""
+
 import os
 import pytest
 
@@ -5,6 +13,7 @@ from plugin_manager import PluginManager
 
 
 def test_find_plugin_file_with_existing_path(tmp_path):
+    """Verify that an existing plugin path resolves to its absolute path."""
     plugin_file = tmp_path / "sample_plugin.py"
     plugin_file.write_text("# test plugin")
 
@@ -16,13 +25,16 @@ def test_find_plugin_file_with_existing_path(tmp_path):
 
 
 def test_find_plugin_file_missing_path():
+    """Verify that a missing plugin file raises FileNotFoundError."""
     manager = PluginManager([])
 
     with pytest.raises(FileNotFoundError):
         manager._find_plugin_file("does_not_exist.py")
 
 def test_apply_plugins_only_runs_matching_role():
+    """Verify that only plugins matching the requested role are executed."""
     class FakePlugin:
+        """Minimal plugin substitute used to track whether call() is executed."""
         def __init__(self, role, result):
             self.role = role
             self.result = result
@@ -55,7 +67,9 @@ def test_apply_plugins_only_runs_matching_role():
     assert result["value"] == 10
 
 def test_apply_plugins_handles_none_result():
+    """Verify that existing values remain when a plugin returns None."""
     class FakePlugin:
+        """Minimal plugin substitute that returns no replacement result."""
         def __init__(self):
             self.role = "preprocess"
 
